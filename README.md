@@ -41,5 +41,6 @@ application的标签中修改android:debuggable="true"属性，让程序处于�
 
 删除android:name="cn.wjdiankong.demo.MainActivity"的标签内容
 
-
+### 6>后续修改
+出于需求，需要对application的name属性进行修改。原项目采用先删除后增加的方法。这样不可用，因此简单修改，直接进行字符增加以及索引值修改。不足在于没有针对无name值情况下的修改。这个之后再说
 

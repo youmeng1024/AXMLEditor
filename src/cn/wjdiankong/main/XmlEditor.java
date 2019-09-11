@@ -233,11 +233,65 @@ public class XmlEditor {
 	 */
 	public static void modifyAttr(String tag, String tagName, String attrName, String attrValue){
 		ParserChunkUtils.parserXml();
-		XmlEditor.removeAttr(tag, tagName, attrName);
+		XmlEditor.attrChang(tag, tagName, attrName, attrValue);
 		ParserChunkUtils.parserXml();
-		XmlEditor.addAttr(tag, tagName, attrName, attrValue);
 	}
-	
+
+
+	/**
+	 * 自己写一个，直接修改替换值。省的麻烦
+	 *
+	 * */
+	public static void attrChang(String tag, String tagName, String attrName, String attrValue ){
+
+		for(StartTagChunk chunk : ParserChunkUtils.xmlStruct.startTagChunkList){
+			int tagNameIndex = Utils.byte2int(chunk.name);
+			String tagNameTmp = ParserChunkUtils.xmlStruct.stringChunk.stringContentList.get(tagNameIndex);
+
+			if(tag.equals(tagNameTmp)){
+
+				//如果是application，manifest标签直接处理就好
+				if(tag.equals("application") || tag.equals("manifest")){
+					for(AttributeData data : chunk.attrList){
+						String attrNameTemp1 = ParserChunkUtils.xmlStruct.stringChunk.stringContentList.get(data.name);
+						if(attrName.equals(attrNameTemp1)){
+
+//							//还得修改对应的tag chunk中属性个个数和大小
+//							int countStart = chunk.offset + 28;
+//							byte[] modifyByte = Utils.int2Byte(chunk.attrList.size()-1);
+//							ParserChunkUtils.xmlStruct.byteSrc = Utils.replaceBytes(ParserChunkUtils.xmlStruct.byteSrc, modifyByte, countStart);
+
+//							//修改chunk的大小
+//							int chunkSizeStart = chunk.offset + 4;
+//							int chunkSize = Utils.byte2int(chunk.size);
+//							byte[] modifyByteSize = Utils.int2Byte(chunkSize-20);//一个属性块是20个字节
+//							ParserChunkUtils.xmlStruct.byteSrc = Utils.replaceBytes(ParserChunkUtils.xmlStruct.byteSrc, modifyByteSize, chunkSizeStart);
+//
+//							//删除属性内容
+//							int delStart = data.offset;
+//							int delSize = data.getLen();
+//							ParserChunkUtils.xmlStruct.byteSrc = Utils.removeByte(ParserChunkUtils.xmlStruct.byteSrc, delStart, delSize);
+							System.out.println("the name index:"+data.valueString);
+							int index = getStrIndex(attrValue);
+							System.out.println("after chang index:"+index);
+							data.valueString = index;
+							data.data = index;
+							ParserChunkUtils.xmlStruct.byteSrc = Utils.replaceBytes(ParserChunkUtils.xmlStruct.byteSrc, Utils.int2Byte(index), data.offset+8);
+							ParserChunkUtils.xmlStruct.byteSrc = Utils.replaceBytes(ParserChunkUtils.xmlStruct.byteSrc, Utils.int2Byte(index), data.offset+16);
+							modifStringChunk();
+							modifyFileSize();
+							return;
+						}
+					}
+				}
+
+
+			}
+		}
+
+	}
+
+
 	/**
 	 * 添加属性值
 	 * @param tag
@@ -352,8 +406,12 @@ public class XmlEditor {
 			}
 		}
 		ParserChunkUtils.xmlStruct.stringChunk.stringContentList.add(str);
+
+
 		return ParserChunkUtils.xmlStruct.stringChunk.stringContentList.size()-1;
 	}
+
+
 	
 	/**
 	 * 判断是否是application外部的标签，application的内部和外部标签需要区分对待
